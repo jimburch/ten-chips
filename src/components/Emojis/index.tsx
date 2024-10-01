@@ -1,10 +1,10 @@
 "use client"
 
 import { useState } from "react"
-import { Button, Flex, Input, Text } from "@chakra-ui/react"
+import { Button, Flex, Input } from "@chakra-ui/react"
 import type { Emojis } from "@/utils/emojis"
 import { searchEmojis } from "@/utils/search"
-
+import EmojiButton from "@/components/buttons/EmojiButton"
 export default function Emojis({ emojis }: { emojis: Emojis }) {
   const [selectedCategory, setSelectedCategory] = useState<string>("smileys")
   const [searchedEmojis, setSearchedEmojis] = useState<object[]>([])
@@ -26,15 +26,23 @@ export default function Emojis({ emojis }: { emojis: Emojis }) {
     return searchedEmojis
       .slice(0, 50)
       .map((emojiObject) => (
-        <Text key={Object.keys(emojiObject)[0]}>
-          {Object.values(emojiObject)[0]}
-        </Text>
+        <EmojiButton
+          key={Object.keys(emojiObject)[0]}
+          emoji={Object.values(emojiObject)[0]}
+          onClick={() => {}}
+        />
       ))
   }
 
   const renderEmojiCategories = () => {
     return Object.entries(emojis[selectedCategory as keyof typeof Emojis]).map(
-      ([emojiLabel, emoji]) => <Text key={emojiLabel}>{emoji as string}</Text>
+      ([emojiLabel, emoji]) => (
+        <EmojiButton
+          key={emojiLabel}
+          emoji={emoji as string}
+          onClick={() => {}}
+        />
+      )
     )
   }
 
