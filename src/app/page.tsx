@@ -4,18 +4,30 @@ import { type CoreMessage } from "ai"
 import { useState } from "react"
 import { continueConversation } from "./actions"
 import { readStreamableValue } from "ai/rsc"
+import { Heading, Flex, Input, Text } from "@chakra-ui/react"
+import Emojis from "@/components/Emojis"
+import { emojis } from "@/utils/emojis"
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
 
-export default function Chat() {
+export default function Home() {
   const [messages, setMessages] = useState<CoreMessage[]>([])
   const [input, setInput] = useState("")
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   // const [data, setData] = useState<any>()
   return (
-    <div className="flex flex-col w-full max-w-md py-24 mx-auto stretch">
-      {/* {data && <pre>{JSON.stringify(data, null, 2)}</pre>} */}
+    <Flex
+      direction="column"
+      w="full"
+      maxW="lg"
+      py="24"
+      mx="auto"
+      align="stretch"
+    >
+      <Heading>Ten Chips</Heading>
+      <Text>10 Tries to Guess the Emoji of the Day</Text>
+
       {messages.map((m, i) => (
         <div key={i} className="whitespace-pre-wrap">
           {m.role === "user" ? "User: " : "AI: "}
@@ -48,13 +60,13 @@ export default function Chat() {
           }
         }}
       >
-        <input
-          className="fixed bottom-0 w-full max-w-md p-2 mb-8 border border-gray-300 rounded shadow-xl"
+        <Input
           value={input}
           placeholder="Say something..."
           onChange={(e) => setInput(e.target.value)}
         />
       </form>
-    </div>
+      <Emojis emojis={emojis} />
+    </Flex>
   )
 }
