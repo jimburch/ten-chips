@@ -1,29 +1,35 @@
 "use client"
 
-import { type CoreMessage } from "ai"
 import { useState } from "react"
-import { continueConversation, generateFilteredEmojis } from "./actions"
-import { readStreamableValue } from "ai/rsc"
-import { Heading, Flex, Input, Text, Button } from "@chakra-ui/react"
-import Emojis from "@/components/Emojis"
-import { emojis } from "@/utils/emojis"
+import { generateResponse } from "./actions"
+import { Heading, Flex, Text, Center } from "@chakra-ui/react"
+import { EmojiStyle } from "emoji-picker-react"
+import Picker from "@/components/Picker"
+import Input from "@/components/Input"
+import Chips from "@/components/Chips"
+import { ResponseType } from "@/types"
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
-export const emojiOfTheDay = "🐶"
 
 export default function Home() {
-  const [messages, setMessages] = useState<CoreMessage[]>([])
   const [input, setInput] = useState("")
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // const [data, setData] = useState<any>()
+  const [generatedResponses, setGeneratedResponses] = useState<ResponseType[]>(
+    []
+  )
+  const [count, setCount] = useState(10)
 
-  const handleTest = async () => {
-    const result = await generateFilteredEmojis(
-      emojis,
-      "Question: is it a flag, Answer: No"
-    )
-    console.log(result)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setInput("")
+
+    const result = await generateResponse({
+      question: input,
+      emoji: "🐶",
+    })
+
+    setGeneratedResponses([...generatedResponses, result])
+    setCount(count - 1)
   }
 
   return (
@@ -31,53 +37,41 @@ export default function Home() {
       direction="column"
       w="full"
       maxW="md"
-      py="24"
+      padding={4}
       mx="auto"
       align="stretch"
     >
-      <Button onClick={handleTest}>Test</Button>
-      <Heading>Ten Chips</Heading>
-      <Text>10 Tries to Guess the Emoji of the Day</Text>
+      <Center
+        bg="gray.100"
+        p={4}
+        borderRadius="md"
+        height={100}
+        width={100}
+        alignSelf="center"
+      >
+        <Heading>?</Heading>
+      </Center>
 
-      {messages.map((m, i) => (
-        <div key={i} className="whitespace-pre-wrap">
-          {m.role === "user" ? "User: " : "AI: "}
-          {m.content as string}
-        </div>
+      <Chips generatedResponses={generatedResponses} />
+
+      {generatedResponses.map((answer, index) => (
+        <Text key={index}>{answer.response}</Text>
       ))}
 
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault()
-          const newMessages: CoreMessage[] = [
-            ...messages,
-            { content: input, role: "user" },
-          ]
+      <Input
+        inputValue={input}
+        setInputValue={setInput}
+        handleSubmit={handleSubmit}
+      />
 
-          setMessages(newMessages)
-          setInput("")
-
-          const result = await continueConversation(newMessages)
-          // setData(result.data)
-
-          for await (const content of readStreamableValue(result.message)) {
-            setMessages([
-              ...newMessages,
-              {
-                role: "assistant",
-                content: content as string,
-              },
-            ])
-          }
-        }}
-      >
-        <Input
-          value={input}
-          placeholder="Say something..."
-          onChange={(e) => setInput(e.target.value)}
-        />
-      </form>
-      <Emojis emojis={emojis} />
+      <Picker
+        emojiStyle={EmojiStyle.NATIVE}
+        width="100%"
+        // height={600}
+        onEmojiClick={() => console.log("clicked a thingy")}
+        skinTonesDisabled
+        autoFocusSearch={false}
+      />
     </Flex>
   )
 }

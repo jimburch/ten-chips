@@ -3,8 +3,7 @@
 import { createStreamableValue } from "ai/rsc"
 import { CoreMessage, streamText, generateObject } from "ai"
 import { openai } from "@ai-sdk/openai"
-import type { Emojis } from "@/utils/emojis"
-import { z } from "zod"
+import { ResponseSchema, ResponseType } from "@/types"
 
 export async function continueConversation(messages: CoreMessage[]) {
   "use server"
@@ -17,31 +16,26 @@ export async function continueConversation(messages: CoreMessage[]) {
   return { message: stream.value }
 }
 
-export async function generateFilteredEmojis(emojis: Emojis, criteria: string) {
+interface GenerateResponseProps {
+  question: string
+  emoji: string
+}
+
+export async function generateResponse({
+  question,
+  emoji,
+}: GenerateResponseProps): Promise<ResponseType> {
   "use server"
-  try {
-    console.log("we running", emojis, criteria)
-    const { object } = await generateObject({
-      model: openai("gpt-4o-mini"),
-      schema: z
-        .object({
-          smileys: z.record(z.string()),
-          people: z.record(z.string()),
-          animals: z.record(z.string()),
-          food: z.record(z.string()),
-          travel: z.record(z.string()),
-          activities: z.record(z.string()),
-          objects: z.record(z.string()),
-          symbols: z.record(z.string()),
-          flags: z.record(z.string()),
-        })
-        .partial(),
-      prompt: `Return this JSON object with the same structure, but only include emojis that answer this question: ${criteria}. This is the JSON object: ${JSON.stringify(emojis)}`,
-    })
-    console.log("we done")
-    console.log(object)
-    return object
-  } catch (error) {
-    console.log(error)
-  }
+  const { object } = await generateObject({
+    model: openai("gpt-4o-mini"),
+    schema: ResponseSchema,
+    prompt: `You are playing a game of 20 questions with the user. The answer is the emoji: ${emoji}. The user's question is: ${question}.
+
+    Answer true or false in the "answer" field. And give a short text response that confirms or denies the user's answer in the "response" field, followed by an example emoji that matches the response.
+
+    For example, "The emoji is not a flag 🇺🇸" or "The emoji is a face 🤪". Do not start the response with "yes" or "no". Always start with "The emoji is..." Do not provide any text after the one-sentence response. The example emoji must never be the answer as ${emoji}. The example emoji must not be a hint at the answer.
+
+    If the question is too abstract, not a yes or no question, or is not a question related to the game, answer false and respond with "This is an invalid question. Try again!"`,
+  })
+  return object
 }
