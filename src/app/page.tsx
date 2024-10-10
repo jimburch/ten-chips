@@ -2,15 +2,12 @@
 
 import { useState } from "react"
 import { generateResponse } from "./actions"
-import { Heading, Flex, Text, Center } from "@chakra-ui/react"
+import { Heading, Flex, Text, Center, Button } from "@chakra-ui/react"
 import { EmojiStyle } from "emoji-picker-react"
-import Picker from "@/components/Picker"
-import Input from "@/components/Input"
-import Chips from "@/components/Chips"
+import { Picker, Input, Chips } from "@/components"
 import { ResponseType } from "@/types"
 
-// Allow streaming responses up to 30 seconds
-export const maxDuration = 30
+export const EMOJI_OF_THE_DAY = "◻️"
 
 export default function Home() {
   const [input, setInput] = useState("")
@@ -18,18 +15,41 @@ export default function Home() {
     []
   )
   const [count, setCount] = useState(10)
-
+  const [emojiGuess, setEmojiGuess] = useState("")
+  const [isAnswering, setIsAnswering] = useState(false)
+  const [showPicker, setShowPicker] = useState(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setInput("")
+    setIsAnswering(true)
 
     const result = await generateResponse({
       question: input,
-      emoji: "🐶",
+      emoji: EMOJI_OF_THE_DAY,
     })
 
     setGeneratedResponses([...generatedResponses, result])
     setCount(count - 1)
+    setIsAnswering(false)
+    console.log("count", count)
+  }
+
+  const handleConfirm = async () => {
+    if (emojiGuess !== EMOJI_OF_THE_DAY) {
+      setGeneratedResponses([
+        ...generatedResponses,
+        { answer: false, response: `The emoji is not ${emojiGuess}` },
+      ])
+      setCount(count - 1)
+    }
+
+    if (emojiGuess === EMOJI_OF_THE_DAY) {
+      setGeneratedResponses([
+        ...generatedResponses,
+        { answer: true, response: `The emoji is ${emojiGuess}` },
+      ])
+      setCount(count - 1)
+    }
   }
 
   return (
@@ -49,8 +69,14 @@ export default function Home() {
         width={100}
         alignSelf="center"
       >
-        <Heading>?</Heading>
+        <Heading>{emojiGuess ? emojiGuess : "?"}</Heading>
       </Center>
+      {emojiGuess && (
+        <>
+          <Button onClick={handleConfirm}>Confirm</Button>
+          <Button onClick={() => setEmojiGuess("")}>Clear</Button>
+        </>
+      )}
 
       <Chips generatedResponses={generatedResponses} />
 
@@ -62,16 +88,21 @@ export default function Home() {
         inputValue={input}
         setInputValue={setInput}
         handleSubmit={handleSubmit}
+        isAnswering={isAnswering}
       />
 
-      <Picker
-        emojiStyle={EmojiStyle.NATIVE}
-        width="100%"
-        // height={600}
-        onEmojiClick={() => console.log("clicked a thingy")}
-        skinTonesDisabled
-        autoFocusSearch={false}
-      />
+      <Button onClick={() => setShowPicker(!showPicker)}>
+        {showPicker ? "Hide Picker" : "Show Picker"}
+      </Button>
+      {showPicker && (
+        <Picker
+          emojiStyle={EmojiStyle.NATIVE}
+          width="100%"
+          onEmojiClick={(emoji) => setEmojiGuess(emoji.emoji)}
+          skinTonesDisabled
+          autoFocusSearch={false}
+        />
+      )}
     </Flex>
   )
 }

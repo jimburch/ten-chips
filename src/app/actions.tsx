@@ -1,20 +1,8 @@
 "use server"
 
-import { createStreamableValue } from "ai/rsc"
-import { CoreMessage, streamText, generateObject } from "ai"
+import { generateObject } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { ResponseSchema, ResponseType } from "@/types"
-
-export async function continueConversation(messages: CoreMessage[]) {
-  "use server"
-  const result = await streamText({
-    model: openai("gpt-4o-mini"),
-    messages,
-  })
-  // const data = { test: "hello" }
-  const stream = createStreamableValue(result.textStream)
-  return { message: stream.value }
-}
 
 interface GenerateResponseProps {
   question: string
