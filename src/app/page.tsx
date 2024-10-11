@@ -6,8 +6,32 @@ import { Heading, Flex, Text, Center, Button } from "@chakra-ui/react"
 import { EmojiStyle } from "emoji-picker-react"
 import { Picker, Input, Chips } from "@/components"
 import { ResponseType } from "@/types"
+import Confetti from "react-confetti"
 
-export const EMOJI_OF_THE_DAY = "◻️"
+const EMOJI_OPTIONS = [
+  "🏀", // Sports
+  "🍕", // Food
+  "🐘", // Animals
+  "🚀", // Travel & Places
+  "🎸", // Activities
+  "🌈", // Nature
+  "🤖", // Smileys & People
+  "💡", // Objects
+  "🏆", // Awards
+  "🎭", // Arts & Entertainment
+  "🧬", // Science
+  "🌋", // Geography
+  "🎨", // Art Supplies
+  "📚", // Books
+  "🧩", // Games
+  "🎉", // Celebration
+  "🔮", // Magic
+  "🦄", // Mythical Creatures
+  "🌺", // Flowers
+  "🧠", // Body Parts
+]
+export const EMOJI_OF_THE_DAY =
+  EMOJI_OPTIONS[Math.floor(Math.random() * EMOJI_OPTIONS.length)]
 
 export default function Home() {
   const [input, setInput] = useState("")
@@ -18,6 +42,7 @@ export default function Home() {
   const [emojiGuess, setEmojiGuess] = useState("")
   const [isAnswering, setIsAnswering] = useState(false)
   const [showPicker, setShowPicker] = useState(false)
+  const [isCorrect, setIsCorrect] = useState(false)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setInput("")
@@ -31,6 +56,9 @@ export default function Home() {
     setGeneratedResponses([...generatedResponses, result])
     setCount(count - 1)
     setIsAnswering(false)
+
+    if (count <= 1) setShowPicker(true)
+
     console.log("count", count)
   }
 
@@ -49,6 +77,7 @@ export default function Home() {
         { answer: true, response: `The emoji is ${emojiGuess}` },
       ])
       setCount(count - 1)
+      setIsCorrect(true)
     }
   }
 
@@ -60,10 +89,10 @@ export default function Home() {
       padding={4}
       mx="auto"
       align="stretch"
+      gap={4}
     >
       <Center
-        bg="gray.100"
-        p={4}
+        bg={isCorrect ? "green.100" : "gray.100"}
         borderRadius="md"
         height={100}
         width={100}
@@ -80,9 +109,11 @@ export default function Home() {
 
       <Chips generatedResponses={generatedResponses} />
 
-      {generatedResponses.map((answer, index) => (
-        <Text key={index}>{answer.response}</Text>
-      ))}
+      <Flex direction="column" justify="center">
+        {generatedResponses.map((answer, index) => (
+          <Text key={index}>{answer.response}</Text>
+        ))}
+      </Flex>
 
       <Input
         inputValue={input}
@@ -103,6 +134,7 @@ export default function Home() {
           autoFocusSearch={false}
         />
       )}
+      {isCorrect && <Confetti />}
     </Flex>
   )
 }

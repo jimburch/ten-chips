@@ -24,7 +24,7 @@ const Input = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <Flex direction="column" gap={2} py={4}>
+      <Flex direction="column" gap={4}>
         <ChakraInput
           ref={inputRef}
           value={inputValue}

@@ -7,7 +7,7 @@ type ChipsProps = {
 
 const Chips = ({ generatedResponses }: ChipsProps) => {
   return (
-    <Flex my={4} justify="center" gap={2}>
+    <Flex justify="center" gap={2}>
       {[
         ...generatedResponses.map((answer, i) => (
           <Text key={i} fontSize="xl">
