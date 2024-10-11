@@ -30,7 +30,7 @@ const EMOJI_OPTIONS = [
   "🌺", // Flowers
   "🧠", // Body Parts
 ]
-export const EMOJI_OF_THE_DAY =
+const EMOJI_OF_THE_DAY =
   EMOJI_OPTIONS[Math.floor(Math.random() * EMOJI_OPTIONS.length)]
 
 export default function Home() {
